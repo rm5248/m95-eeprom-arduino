@@ -31,8 +31,7 @@ void setup() {
 
   Serial.print("bytes @0x6000: ");
   for(int x = 0; x < 8; x++){
-    uint8_t* as_u8 = (uint8_t*)&unique_id;
-    Serial.print(as_u8[x], HEX);
+    Serial.print(bytes[x], HEX);
   }
   Serial.println();
 }
