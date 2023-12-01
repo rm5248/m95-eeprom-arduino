@@ -73,6 +73,7 @@ public:
 private:
   int read_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
   int write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
+  void wait_for_write_complete();
 
 private:
   SPIClass* m_spi;

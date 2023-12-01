@@ -68,43 +68,62 @@ int M95_EEPROM::read_internal(byte command, uint32_t address, uint16_t num_bytes
 }
 
 int M95_EEPROM::write(uint32_t address, uint16_t num_bytes, void* buffer){
-  digitalWrite(m_cs_pin, LOW);
-  delay(1);
-  SPI.transfer(EEPROM_WRITE_ENABLE);
-  digitalWrite(m_cs_pin, HIGH);
-
-  delay(1);
-
   return write_internal(EEPROM_WRITE_MEMORY_ARRAY, address, num_bytes, buffer);
 }
 
 int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer){
-  digitalWrite(m_cs_pin, LOW);
-  SPI.transfer(command);
-
-  if(m_num_address_bytes == 1){
-    m_spi->transfer((address & 0xFF) >> 0);
-  }else if(m_num_address_bytes == 2){
-    m_spi->transfer((address & 0xFF00) >> 8);
-    m_spi->transfer((address & 0x00FF) >> 0);
-  }else if(m_num_address_bytes == 3){
-    m_spi->transfer((address & 0xFF0000) >> 16);
-    m_spi->transfer((address & 0x00FF00) >> 8);
-    m_spi->transfer((address & 0x0000FF) >> 0);
-  }else{
-    digitalWrite(m_cs_pin, HIGH);
-    return -1;
-  }
-
+  uint32_t current_location = address;
   uint8_t* u8_data = buffer;
-  while(num_bytes > 0){
-    num_bytes--;
-    SPI.transfer(*u8_data); // data byte
-    u8_data++;
-  }
+
+  do{
+    digitalWrite(m_cs_pin, LOW);
+    delay(1);
+    m_spi->transfer(EEPROM_WRITE_ENABLE);
+    digitalWrite(m_cs_pin, HIGH);
+
+    digitalWrite(m_cs_pin, LOW);
+    delay(1);
+    m_spi->transfer(command);
+
+    if(m_num_address_bytes == 1){
+      m_spi->transfer((address & 0xFF) >> 0);
+    }else if(m_num_address_bytes == 2){
+      m_spi->transfer((address & 0xFF00) >> 8);
+      m_spi->transfer((address & 0x00FF) >> 0);
+    }else if(m_num_address_bytes == 3){
+      m_spi->transfer((address & 0xFF0000) >> 16);
+      m_spi->transfer((address & 0x00FF00) >> 8);
+      m_spi->transfer((address & 0x0000FF) >> 0);
+    }else{
+      digitalWrite(m_cs_pin, HIGH);
+      return -1;
+    }
+
+    while(num_bytes > 0){
+      num_bytes--;
+      m_spi->transfer(*u8_data); // data byte
+      u8_data++;
+      current_location++;
+
+      if((current_location % m_page_size) == 0){
+        // Rollover on page boundary
+        // Terminate this write and go to the next page
+        digitalWrite(m_cs_pin, HIGH);
+        wait_for_write_complete();
+        address = current_location;
+        break;
+      }
+    }
+  }while(num_bytes);
 
   digitalWrite(m_cs_pin, HIGH);
 
+  wait_for_write_complete();
+
+  return 0;
+}
+
+void M95_EEPROM::wait_for_write_complete(){
   int numTimes = 0;
   while(numTimes < 50){
     // Read until the write in progress bit is 0
@@ -116,8 +135,6 @@ int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_byte
       break;
     }
   }
-
-  return 0;
 }
 
 bool M95_EEPROM::exists(){
@@ -158,7 +175,8 @@ int M95_EEPROM::write_id_page(uint16_t num_bytes, void* buffer){
 }
 
 int M95_EEPROM::lock_id_page(){
-
+  uint8_t data_byte = 0x02;
+  return write_internal(EEPROM_WRITE_ID_PAGE, (0x01 << 10), 1, &data_byte);
 }
 
 bool M95_EEPROM::id_page_locked(){
@@ -167,7 +185,7 @@ bool M95_EEPROM::id_page_locked(){
 
   m_spi->transfer(EEPROM_READ_ID_PAGE);
 
-  int address = 0x20;
+  uint32_t address = (0x01 << 10);
 
   if(m_num_address_bytes == 1){
     m_spi->transfer((address & 0xFF) >> 0);
