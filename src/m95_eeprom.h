@@ -9,9 +9,9 @@ public:
   /*
    * Create a basic M95_EEPROM with the given page size.  Assumes 2 address bytes and no ID page
    */
-  M95_EEPROM(SPIClass* spi, int cs, int page_size);
+  M95_EEPROM(SPIClass& spi, int cs, int page_size);
 
-  M95_EEPROM(SPIClass* spi, int cs, int page_size, int address_bytes, bool id_page);
+  M95_EEPROM(SPIClass& spi, int cs, int page_size, int address_bytes, bool id_page);
 
   void begin();
   void end();
@@ -76,7 +76,7 @@ private:
   void wait_for_write_complete();
 
 private:
-  SPIClass* m_spi;
+  SPIClass& m_spi;
   int m_cs_pin;
   int m_page_size;
   int m_num_address_bytes;
