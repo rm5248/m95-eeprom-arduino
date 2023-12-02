@@ -152,7 +152,7 @@ void M95_EEPROM::wait_for_write_complete(){
     delay(1);
 
     int status_reg = status_register();
-    if(status_reg & 0x01 == 0){
+    if((status_reg & 0x01) == 0){
       break;
     }
   }
