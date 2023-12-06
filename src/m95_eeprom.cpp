@@ -151,7 +151,7 @@ void M95_EEPROM::wait_for_write_complete(){
     numTimes++;
     delay(1);
 
-    int status_reg = status_register();
+    int status_reg = status_register_internal();
     if((status_reg & 0x01) == 0){
       break;
     }
@@ -233,6 +233,10 @@ bool M95_EEPROM::id_page_locked(){
 
 uint8_t M95_EEPROM::status_register(){
   SPITransaction transaction(m_spi);
+  return status_register_internal();
+}
+
+uint8_t M95_EEPROM::status_register_internal(){
   digitalWrite(m_cs_pin, LOW);
   delay(1);
   m_spi.transfer(EEPROM_READ_STATUS_REGISTER);
