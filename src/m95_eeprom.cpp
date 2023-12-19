@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "m95_eeprom.h"
+#include "M95_EEPROM.h"
 
 static const byte EEPROM_WRITE_ENABLE = 0x6;
 static const byte EEPROM_READ_STATUS_REGISTER = 0x5;
