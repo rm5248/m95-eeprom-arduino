@@ -9,7 +9,7 @@ static const byte EEPROM_CS = 10;
  * In this particular example, we use a M95256 chip from ST.  This
  * chip has a 64-byte page size and no ID page.
  */
-M95_EEPROM eeprom(&SPI, EEPROM_CS, 64);
+M95_EEPROM eeprom(SPI, EEPROM_CS, 64);
 
 void setup() {
   SPI.begin();
