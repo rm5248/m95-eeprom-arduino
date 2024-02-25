@@ -239,3 +239,56 @@ uint8_t M95_EEPROM::status_register_internal(){
 
   return read_status_reg;
 }
+
+int M95_EEPROM::start_continuous_read(uint32_t address){
+  m_address_continuous = address;
+
+  m_spi.beginTransaction(m95_spi_settings);
+  digitalWrite(m_cs_pin, LOW);
+  m_spi.transfer(EEPROM_READ_MEMORY_ARRAY);
+
+  if(m_num_address_bytes == 1){
+    m_spi.transfer((address & 0xFF) >> 0);
+  }else if(m_num_address_bytes == 2){
+    m_spi.transfer((address & 0xFF00) >> 8);
+    m_spi.transfer((address & 0x00FF) >> 0);
+  }else if(m_num_address_bytes == 3){
+    m_spi.transfer((address & 0xFF0000) >> 16);
+    m_spi.transfer((address & 0x00FF00) >> 8);
+    m_spi.transfer((address & 0x0000FF) >> 0);
+  }else{
+    digitalWrite(m_cs_pin, HIGH);
+    m_spi.endTransaction();
+    return -1;
+  }
+}
+
+int M95_EEPROM::read_continuous(uint32_t num_bytes, void* buffer){
+  uint8_t* u8_data = buffer;
+  while(num_bytes > 0){
+    num_bytes--;
+    *u8_data = m_spi.transfer(0xFF); // dummy byte
+    u8_data++;
+    m_address_continuous++;
+  }
+  return 0;
+}
+
+int M95_EEPROM::read_continuous_skip(uint32_t skip_bytes){
+  while(skip_bytes > 0){
+    skip_bytes--;
+    m_spi.transfer(0xFF); // dummy byte
+    m_address_continuous++;
+  }
+  return 0;
+}
+
+uint32_t M95_EEPROM::current_location(){
+  return m_address_continuous;
+}
+
+int M95_EEPROM::end_continous_read(){
+  digitalWrite(m_cs_pin, HIGH);
+  m_spi.endTransaction();
+  return 0;
+}

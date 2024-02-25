@@ -70,6 +70,31 @@ public:
    */
   uint8_t status_register();
 
+  /*
+   * Start a continuous read from the EEPROM.  You must call end_continuous_read once you are done reading.
+   */
+  int start_continuous_read(uint32_t address);
+
+  /*
+   * Do a continuous read into the buffer.
+   */
+  int read_continuous(uint32_t num_bytes, void* buffer);
+
+  /*
+   * During a continuous read, skip over the next number of bytes
+   */
+  int read_continuous_skip(uint32_t skip_bytes);
+
+  /*
+   * When doing a continuous read, the current location in the EEPROM.
+   */
+  uint32_t current_location();
+
+  /*
+   * Stop reading continously from the EEPROM.
+   */
+  int end_continous_read();
+
 private:
   int read_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
   int write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
@@ -82,6 +107,7 @@ private:
   int m_page_size;
   int m_num_address_bytes;
   bool m_id_page;
+  uint32_t m_address_continuous = 0;
 };
 
 #endif /* M95_EEPROM_H */
