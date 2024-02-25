@@ -57,7 +57,6 @@ int M95_EEPROM::read(uint32_t address, uint16_t num_bytes, void* buffer){
 int M95_EEPROM::read_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer){
   SPITransaction transaction(m_spi);
   digitalWrite(m_cs_pin, LOW);
-  delay(1);
   m_spi.transfer(command);
 
   if(m_num_address_bytes == 1){
@@ -97,13 +96,11 @@ int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_byte
 
   do{
     digitalWrite(m_cs_pin, LOW);
-    delay(1);
     m_spi.transfer(EEPROM_WRITE_ENABLE);
     digitalWrite(m_cs_pin, HIGH);
 
-    delay(1);
+    delayMicroseconds(10);
     digitalWrite(m_cs_pin, LOW);
-    delay(1);
     m_spi.transfer(command);
 
     if(m_num_address_bytes == 1){
@@ -164,7 +161,7 @@ bool M95_EEPROM::exists(){
   m_spi.transfer(EEPROM_WRITE_ENABLE);
   digitalWrite(m_cs_pin, HIGH);
 
-  delay(1);
+  delayMicroseconds(10);
 
   digitalWrite(m_cs_pin, LOW);
   m_spi.transfer(EEPROM_READ_STATUS_REGISTER);
@@ -176,7 +173,6 @@ bool M95_EEPROM::exists(){
     // WEL bit is set, so we are talking with the EEPROM!
     // Let's go and disable it again
     digitalWrite(m_cs_pin, LOW);
-    delay(1);
     m_spi.transfer(EEPROM_WRITE_DISABLE);
     digitalWrite(m_cs_pin, HIGH);
     return true;
@@ -205,7 +201,6 @@ int M95_EEPROM::lock_id_page(){
 bool M95_EEPROM::id_page_locked(){
   SPITransaction transaction(m_spi);
   digitalWrite(m_cs_pin, LOW);
-  delay(1);
 
   m_spi.transfer(EEPROM_READ_ID_PAGE);
 
@@ -238,7 +233,6 @@ uint8_t M95_EEPROM::status_register(){
 
 uint8_t M95_EEPROM::status_register_internal(){
   digitalWrite(m_cs_pin, LOW);
-  delay(1);
   m_spi.transfer(EEPROM_READ_STATUS_REGISTER);
   int read_status_reg = m_spi.transfer(0xFF);
   digitalWrite(m_cs_pin, HIGH);
