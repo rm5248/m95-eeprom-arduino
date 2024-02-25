@@ -1,6 +1,6 @@
 #include <SPI.h>
 
-#include "m95_eeprom.h"
+#include "M95_EEPROM.h"
 
 static const byte EEPROM_CS = 10;
 
