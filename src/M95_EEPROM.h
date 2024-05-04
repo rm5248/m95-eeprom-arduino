@@ -22,7 +22,7 @@ public:
    * @param address The address to read from
    * @param num_bytes How many bytes to read
    * @param buffer The location to put the bytes.  Must be at least num_bytes long
-   * @return num bytes written, or -1 on error
+   * @return 0 on success, or -1 on error
    */
   int read(uint32_t address, uint16_t num_bytes, void* buffer);
 
@@ -33,9 +33,9 @@ public:
    * @param address The address to write to
    * @param num_bytes How many bytes to write
    * @param buffer The location bytes are read from
-   * @return num bytes written, or -1 on error
+   * @return 0 on success, or -1 on error
    */
-  int write(uint32_t address, uint16_t num_bytes, void* buffer);
+  int write(uint32_t address, uint16_t num_bytes, const void* buffer);
 
   /*
    * Check to see if the EEPROM exists.  Reads from the specified chip and makes sure that
@@ -53,7 +53,7 @@ public:
   /*
    * Write the ID page of the device.  If the ID page does not exist, returns -1
    */
-  int write_id_page(uint16_t num_bytes, void* buffer);
+  int write_id_page(uint16_t num_bytes, const void* buffer);
 
   /*
    * Lock the ID page.  If the ID page does not exist, returns -1.  Once the ID page is locked, it is read-only.
@@ -97,7 +97,7 @@ public:
 
 private:
   int read_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
-  int write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer);
+  int write_internal(byte command, uint32_t address, uint16_t num_bytes, const void* buffer);
   void wait_for_write_complete();
   uint8_t status_register_internal();
 

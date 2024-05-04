@@ -14,8 +14,8 @@ static const SPISettings m95_spi_settings(10UL * 1000UL * 1000UL, MSBFIRST, SPI_
 
 class SPITransaction{
 public:
-  SPITransaction(SPIClass& spi){
-    m_spi = spi;
+  SPITransaction(SPIClass& spi) :
+    m_spi(spi){
     spi.beginTransaction(m95_spi_settings);
   }
 
@@ -73,7 +73,7 @@ int M95_EEPROM::read_internal(byte command, uint32_t address, uint16_t num_bytes
     return -1;
   }
 
-  uint8_t* u8_data = buffer;
+  uint8_t* u8_data = (uint8_t*)buffer;
   while(num_bytes > 0){
     num_bytes--;
     *u8_data = m_spi.transfer(0xFF); // dummy byte
@@ -85,13 +85,13 @@ int M95_EEPROM::read_internal(byte command, uint32_t address, uint16_t num_bytes
   return 0;
 }
 
-int M95_EEPROM::write(uint32_t address, uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write(uint32_t address, uint16_t num_bytes, const void* buffer){
   return write_internal(EEPROM_WRITE_MEMORY_ARRAY, address, num_bytes, buffer);
 }
 
-int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_bytes, const void* buffer){
   uint32_t current_location = address;
-  uint8_t* u8_data = buffer;
+  const uint8_t* u8_data = (const uint8_t*)buffer;
   SPITransaction transaction(m_spi);
 
   do{
@@ -189,7 +189,7 @@ int M95_EEPROM::read_id_page(uint16_t num_bytes, void* buffer){
   return read_internal(EEPROM_READ_ID_PAGE, 0, num_bytes, buffer);
 }
 
-int M95_EEPROM::write_id_page(uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write_id_page(uint16_t num_bytes, const void* buffer){
   return write_internal(EEPROM_WRITE_ID_PAGE, 0, num_bytes, buffer);
 }
 
@@ -264,7 +264,7 @@ int M95_EEPROM::start_continuous_read(uint32_t address){
 }
 
 int M95_EEPROM::read_continuous(uint32_t num_bytes, void* buffer){
-  uint8_t* u8_data = buffer;
+  uint8_t* u8_data = (uint8_t*)buffer;
   while(num_bytes > 0){
     num_bytes--;
     *u8_data = m_spi.transfer(0xFF); // dummy byte
