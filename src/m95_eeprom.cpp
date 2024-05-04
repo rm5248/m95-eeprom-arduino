@@ -85,13 +85,13 @@ int M95_EEPROM::read_internal(byte command, uint32_t address, uint16_t num_bytes
   return 0;
 }
 
-int M95_EEPROM::write(uint32_t address, uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write(uint32_t address, uint16_t num_bytes, const void* buffer){
   return write_internal(EEPROM_WRITE_MEMORY_ARRAY, address, num_bytes, buffer);
 }
 
-int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write_internal(byte command, uint32_t address, uint16_t num_bytes, const void* buffer){
   uint32_t current_location = address;
-  uint8_t* u8_data = (uint8_t*)buffer;
+  const uint8_t* u8_data = (const uint8_t*)buffer;
   SPITransaction transaction(m_spi);
 
   do{
@@ -189,7 +189,7 @@ int M95_EEPROM::read_id_page(uint16_t num_bytes, void* buffer){
   return read_internal(EEPROM_READ_ID_PAGE, 0, num_bytes, buffer);
 }
 
-int M95_EEPROM::write_id_page(uint16_t num_bytes, void* buffer){
+int M95_EEPROM::write_id_page(uint16_t num_bytes, const void* buffer){
   return write_internal(EEPROM_WRITE_ID_PAGE, 0, num_bytes, buffer);
 }
 
