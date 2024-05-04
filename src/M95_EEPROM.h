@@ -22,7 +22,7 @@ public:
    * @param address The address to read from
    * @param num_bytes How many bytes to read
    * @param buffer The location to put the bytes.  Must be at least num_bytes long
-   * @return num bytes written, or -1 on error
+   * @return 0 on success, or -1 on error
    */
   int read(uint32_t address, uint16_t num_bytes, void* buffer);
 
@@ -33,7 +33,7 @@ public:
    * @param address The address to write to
    * @param num_bytes How many bytes to write
    * @param buffer The location bytes are read from
-   * @return num bytes written, or -1 on error
+   * @return 0 on success, or -1 on error
    */
   int write(uint32_t address, uint16_t num_bytes, void* buffer);
 
